@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Service Hub</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.38.4/umd/supabase.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        main {
+            margin-top: 80px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .section {
+            background: white;
+            margin: 2rem 0;
+            padding: 3rem 0;
+            border-radius: 15px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #667eea;
+            font-size: 2.5rem;
+        }
+
+        .leadership-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .leader-card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            transition: transform 0.3s;
+        }
+
+        .leader-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .leader-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .gallery-item {
+            aspect-ratio: 1;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .placeholder-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .user-dashboard {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .upload-area:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .documents-list, .photos-list {
+            margin-top: 2rem;
+        }
+
+        .document-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            background: white;
+        }
+
+        .photo-item {
+            display: inline-block;
+            margin: 0.5rem;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .photo-item img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #667eea;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .success {
+            color: #28a745;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .member-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .leadership-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">Community Hub</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#leadership">Leadership</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+                <li><a href="#documents">Documents</a></li>
+            </ul>
+            <div class="auth-buttons">
+                <div id="memberCount" class="member-count" style="display: none;">0 Members</div>
+                <button class="btn btn-secondary" id="loginBtn" onclick="showLogin()">Sign In</button>
+                <button class="btn btn-primary" id="signupBtn" onclick="showSignup()">Sign Up</button>
+                <span id="userInfo" style="display: none;">
+                    <button class="btn btn-primary" id="userProfile" onclick="showDashboard()">Dashboard</button>
+                    <button class="btn btn-danger" id="logoutBtn" onclick="logout()">Logout</button>
+                </span>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="container">
+                <h1>Building Communities Together</h1>
+                <p>Join us in making a difference through organized community service and meaningful connections</p>
+                <button class="btn btn-primary" onclick="showSignup()">Get Involved</button>
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <div class="container">
+                <h2>About Our Mission</h2>
+                <p style="text-align: center; font-size: 1.1rem; max-width: 800px; margin: 0 auto;">
+                    Our community service organization is dedicated to creating positive change through volunteer work, 
+                    community outreach, and collaborative projects. We believe in the power of collective action to 
+                    address local needs and build stronger neighborhoods.
+                </p>
+            </div>
+        </section>
+
+        <section id="leadership" class="section">
+            <div class="container">
+                <h2>Leadership Team</h2>
+                <div class="leadership-grid" id="leadershipGrid">
+                    <div class="loading">Loading leadership team...</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="gallery" class="section">
+            <div class="container">
+                <h2>Photo Gallery</h2>
+                <div class="gallery-grid" id="galleryGrid">
+                    <div class="loading">Loading photos...</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="documents" class="section">
+            <div class="container">
+                <h2>Documents & Resources</h2>
+                <div class="documents-list" id="documentsList">
+                    <div class="loading">Loading documents...</div>
+                </div>
+            </div>
+        </section>
+
+        <div id="userDashboard" class="user-dashboard">
+            <div class="container">
+                <h2>Member Dashboard</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                    <div>
+                        <h3>Upload Documents</h3>
+                        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                            <p>Click to upload documents</p>
+                            <input type="file" id="fileInput" style="display: none;" multiple onchange="handleFileUpload(event)">
+                        </div>
+                        <div class="form-group">
+                            <label>Document Description:</label>
+                            <textarea id="documentDescription" placeholder="Describe this document..." rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>Upload Photos</h3>
+                        <div class="upload-area" onclick="document.getElementById('photoInput').click()">
+                            <p>Click to upload photos</p>
+                            <input type="file" id="photoInput" style="display: none;" accept="image/*" multiple onchange="handlePhotoUpload(event)">
+                        </div>
+                        <div class="form-group">
+                            <label>Photo Caption:</label>
+                            <input type="text" id="photoCaption" placeholder="Add a caption...">
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 3rem;">
+                    <h3>Add Leadership Member</h3>
+                    <form onsubmit="handleAddLeader(event)">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label>Name:</label>
+                                <input type="text" id="leaderName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Position:</label>
+                                <input type="text" id="leaderPosition" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Bio:</label>
+                            <textarea id="leaderBio" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Leader</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('loginModal')">&times;</span>
+            <h2>Sign In</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <div id="loginError" class="error"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="loginSubmit">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('signupModal')">&times;</span>
+            <h2>Sign Up</h2>
+            <form onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label>Full Name:</label>
+                    <input type="text" id="signupName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="signupEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input type="password" id="signupPassword" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Phone:</label>
+                    <input type="tel" id="signupPhone">
+                </div>
+                <div id="signupError" class="error"></div>
+                <div id="signupSuccess" class="success"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="signupSubmit">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Supabase configuration - Replace with your actual Supabase credentials
+        // STEP 1: Replace these with your actual Supabase credentials
+        // Get them from: https://app.supabase.com/project/YOUR_PROJECT/settings/api
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';  // e.g., 'https://abcdefgh.supabase.co'
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';  // Long string starting with 'eyJhbG...'
+        
+        // Initialize Supabase client
+        let supabase;
+        let currentUser = null;
+
+        // Initialize the application
+        async function initApp() {
+            // Check if Supabase credentials are set
+            if (SUPABASE_URL === 'YOUR_SUPABASE_URL_HERE' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY_HERE') {
+                console.warn('Supabase credentials not set. Using fallback mode.');
+                initFallbackMode();
+                return;
+            }
+
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                
+                // Check current session
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    currentUser = session.user;
+                    showUserInterface();
+                }
+
+                // Listen for auth changes
+                supabase.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_IN') {
+                        currentUser = session.user;
+                        showUserInterface();
+                    } else if (event === 'SIGNED_OUT') {
+                        currentUser = null;
+                        hideUserInterface();
+                    }
+                });
+
+                await loadData();
+            } catch (error) {
+                console.error('Supabase initialization failed:', error);
+                initFallbackMode();
+            }
+        }
+
+        // Fallback mode using localStorage (like the previous version)
+        function initFallbackMode() {
+            console.log('Running in fallback mode with localStorage');
+            currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+            if (currentUser) {
+                showUserInterface();
+            }
+            loadFallbackData();
+        }
+
+        // Load data from Supabase
+        async function loadData() {
+            await Promise.all([
+                loadMemberCount(),
+                loadLeadership(),
+                loadGallery(),
+                loadDocuments()
+            ]);
+        }
+
+        // Load fallback data
+        function loadFallbackData() {
+            loadFallbackLeadership();
+            loadFallbackGallery();
+            loadFallbackDocuments();
+            updateMemberCount();
+        }
+
+        async function loadMemberCount() {
+            try {
+                const { count } = await supabase
+                    .from('profiles')
+                    .select('*', { count: 'exact', head: true });
+                
+                document.getElementById('memberCount').textContent = `${count || 0} Members`;
+                document.getElementById('memberCount').style.display = 'block';
+            } catch (error) {
+                console.error('Error loading member count:', error);
+            }
+        }
+
+        async function loadLeadership() {
+            try {
+                const { data, error } = await supabase
+                    .from('leadership')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                const grid = document.getElementById('leadershipGrid');
+                if (data && data.length > 0) {
+                    grid.innerHTML = data.map(leader => `
+                        <div class="leader-card">
+                            <div class="leader-photo">${leader.name.split(' ').map(n => n[0]).join('')}</div>
+                            <h3>${leader.name}</h3>
+                            <p><strong>${leader.position}</strong></p>
+                            <p>${leader.bio}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    loadFallbackLeadership();
+                }
+            } catch (error) {
+                console.error('Error loading leadership:', error);
+                loadFallbackLeadership();
+            }
+        }
+
+        function loadFallbackLeadership() {
+            const defaultLeaders = [
+                { name: 'Jane Doe', position: 'Executive Director', bio: 'Leading community initiatives for over 10 years' },
+                { name: 'Mike Smith', position: 'Program Coordinator', bio: 'Organizing volunteer programs and events' },
+                { name: 'Sarah Johnson', position: 'Outreach Manager', bio: 'Building partnerships with local organizations' }
+            ];
+
+            const grid = document.getElementById('leadershipGrid');
+            grid.innerHTML = defaultLeaders.map(leader => `
+                <div class="leader-card">
+                    <div class="leader-photo">${leader.name.split(' ').map(n => n[0]).join('')}</div>
+                    <h3>${leader.name}</h3>
+                    <p><strong>${leader.position}</strong></p>
+                    <p>${leader.bio}</p>
+                </div>
+            `).join('');
+        }
+
+        async function loadGallery() {
+            try {
+                const { data, error } = await supabase
+                    .from('gallery')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const grid = document.getElementById('galleryGrid');
+                if (data && data.length > 0) {
+                    grid.innerHTML = data.map(photo => `
+                        <div class="gallery-item">
+                            ${photo.image_url ? 
+                                `<img src="${photo.image_url}" alt="${photo.caption}">` : 
+                                `<div class="placeholder-text">${photo.caption}</div>`
+                            }
+                        </div>
+                    `).join('');
+                } else {
+                    loadFallbackGallery();
+                }
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+                loadFallbackGallery();
+            }
+        }
+
+        function loadFallbackGallery() {
+            const defaultPhotos = [
+                'Community Cleanup', 'Food Drive', 'Tree Planting', 
+                'Senior Center Visit', 'Youth Mentoring', 'Holiday Giving'
+            ];
+
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = defaultPhotos.map(caption => `
+                <div class="gallery-item">
+                    <div class="placeholder-text">${caption}</div>
+                </div>
+            `).join('');
+        }
+
+        async function loadDocuments() {
+            try {
+                const { data, error } = await supabase
+                    .from('documents')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const list = document.getElementById('documentsList');
+                if (data && data.length > 0) {
+                    list.innerHTML = data.map(doc => `
+                        <div class="document-item">
+                            <span>📄 ${doc.title}</span>
+                            <div>
+                                <small>by ${doc.uploaded_by} • ${new Date(doc.created_at).toLocaleDateString()}</small>
+                                ${doc.file_url ? `<button class="btn btn-primary" onclick="window.open('${doc.file_url}')">Download</button>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    loadFallbackDocuments();
+                }
+            } catch (error) {
+                console.error('Error loading documents:', error);
+                loadFallbackDocuments();
+            }
+        }
+
+        function loadFallbackDocuments() {
+            const defaultDocs = [
+                { title: 'Volunteer Handbook 2024', type: 'Download' },
+                { title: 'Event Calendar', type: 'View' },
+                { title: 'Annual Report 2023', type: 'Download' }
+            ];
+
+            const list = document.getElementById('documentsList');
+            list.innerHTML = defaultDocs.map(doc => `
+                <div class="document-item">
+                    <span>📄 ${doc.title}</span>
+                    <button class="btn btn-primary">${doc.type}</button>
+                </div>
+            `).join('');
+        }
+
+        // Authentication functions
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const submitBtn = document.getElementById('loginSubmit');
+            const errorDiv = document.getElementById('loginError');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing in...';
+            errorDiv.textContent = '';
+
+            try {
+                if (supabase) {
+                    const { error } = await supabase.auth.signInWithPassword({
+                        email,
+                        password
+                    });
+
+                    if (error) throw error;
+                    closeModal('loginModal');
+                } else {
+                    // Fallback mode
+                    handleFallbackLogin(email, password);
+                }
+            } catch (error) {
+                errorDiv.textContent = error.message;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign In';
+            }
+        }
+
+        function handleFallbackLogin(email, password) {
+            const users = JSON.parse(localStorage.getItem('communityUsers')) || [];
+            const user = users.find(u => u.email === email && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                showUserInterface();
+                closeModal('loginModal');
+            } else {
+                document.getElementById('loginError').textContent = 'Invalid credentials';
+            }
+        }
+
+        async function handleSignup(event) {
+            event.preventDefault();
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const phone = document.getElementById('signupPhone').value;
+            const submitBtn = document.getElementById('signupSubmit');
+            const errorDiv = document.getElementById('signupError');
+            const successDiv = document.getElementById('signupSuccess');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating account...';
+            errorDiv.textContent = '';
+            successDiv.textContent = '';
+
+            try {
+                if (supabase) {
+                    const { data, error } = await supabase.auth.signUp({
+                        email,
+                        password,
+                        options: {
+                            data: {
+                                full_name: name,
+                                phone: phone
+                            }
+                        }
+                    });
+
+                    if (error) throw error;
+
+                    if (data.user && !data.user.email_confirmed_at) {
+                        successDiv.textContent = 'Please check your email to confirm your account!';
+                    } else {
+                        closeModal('signupModal');
+                    }
+                } else {
+                    // Fallback mode
+                    handleFallbackSignup(name, email, password, phone);
+                }
+            } catch (error) {
+                errorDiv.textContent = error.message;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign Up';
+            }
+        }
+
+        function handleFallbackSignup(name, email, password, phone) {
+            const users = JSON.parse(localStorage.getItem('communityUsers')) || [];
+            
+            if (users.find(u => u.email === email)) {
+                document.getElementById('signupError').textContent = 'Email already registered';
+                return;
+            }
+
+            const newUser = {
+                id: Date.now(),
+                name,
+                email,
+                password,
+                phone,
+                joinDate: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem('communityUsers', JSON.stringify(users));
+            
+            currentUser = newUser;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            showUserInterface();
+            closeModal('signupModal');
+            updateMemberCount();
+        }
+
+        async function logout() {
+            if (supabase) {
+                await supabase.auth.signOut();
+            } else {
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                hideUserInterface();
+            }
+        }
+
+        // File upload functions
+        async function handleFileUpload(event) {
+            if (!currentUser) {
+                alert('Please sign in to upload files.');
+                return;
+            }
+
+            const files = Array.from(event.target.files);
+            const description = document.getElementById('documentDescription').value;
+
+            for (const file of files) {
+                try {
+                    if (supabase) {
+                        // Upload to Supabase Storage
+                        const fileExt = file.name.split('.').pop();
+                        const fileName = `${Date.now()}.${fileExt}`;
+                        
+                        const { data: uploadData, error: uploadError } = await supabase.storage
+                            .from('documents')
+                            .upload(fileName, file);
+
+                        if (uploadError) throw uploadError;
+
+                        // Get public URL
+                        const { data: urlData } = supabase.storage
+                            .from('documents')
+                            .getPublicUrl(fileName);
+
+                        // Save document metadata
+                        const { error: insertError } = await supabase
+                            .from('documents')
+                            .insert({
+                                title: file.name,
+                                description: description || '',
+                                file_url: urlData.publicUrl,
+                                uploaded_by: currentUser.user_metadata?.full_name || currentUser.email,
+                                user_id: currentUser.id
+                            });
+
+                        if (insertError) throw insertError;
+                    } else {
+                        // Fallback mode - simulate upload
+                        const fallbackFiles = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
+                        fallbackFiles.push({
+                            id: Date.now() + Math.random(),
+                            title: file.name,
+                            description: description || '',
+                            uploaded_by: currentUser.name,
+                            created_at: new Date().toISOString()
+                        });
+                        localStorage.setItem('uploadedFiles', JSON.stringify(fallbackFiles));
+                    }
+                } catch (error) {
+                    console.error('Error uploading file:', error);
+                    alert(`Error uploading ${file.name}: ${error.message}`);
+                }
+            }
+
+            await loadDocuments();
+            document.getElementById('documentDescription').value = '';
+            alert(`${files.length} document(s) uploaded successfully!`);
+        }
+
+        async function handlePhotoUpload(event) {
+            if (!currentUser) {
+                alert('Please sign in to upload photos.');
+                return;
+            }
+
+            const files = Array.from(event.target.files);
+            const caption = document.getElementById('photoCaption').value;
+
+            for (const file of files) {
+                try {
+                    if (supabase) {
+                        // Upload to Supabase Storage
+                        const fileExt = file.name.split('.').pop();
+                        const fileName = `${Date.now()}.${fileExt}`;
+                        
+                        const { data: uploadData, error: uploadError } = await supabase.storage
+                            .from('gallery')
+                            .upload(fileName, file);
+
+                        if (uploadError) throw uploadError;
+
+                        // Get public URL
+                        const { data: urlData } = supabase.storage
+                            .from('gallery')
+                            .getPublicUrl(fileName);
+
+                        // Save photo metadata
+                        const { error: insertError } = await supabase
+                            .from('gallery')
+                            .insert({
+                                caption: caption || file.name,
+                                image_url: urlData.publicUrl,
+                                uploaded_by: currentUser.user_metadata?.full_name || currentUser.email,
+                                user_id: currentUser.id
+                            });
+
+                        if (insertError) throw insertError;
+                    } else {
+                        // Fallback mode - simulate upload
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const fallbackPhotos = JSON.parse(localStorage.getItem('uploadedPhotos')) || [];
+                            fallbackPhotos.push({
+                                id: Date.now() + Math.random(),
+                                caption: caption || file.name,
+                                image_url: e.target.result,
+                                uploaded_by: currentUser.name,
+                                created_at: new Date().toISOString()
+                            });
+                            localStorage.setItem('uploadedPhotos', JSON.stringify(fallbackPhotos));
+                            loadFallbackGallery();
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                } catch (error) {
+                    console.error('Error uploading photo:', error);
+                    alert(`Error uploading ${file.name}: ${error.message}`);
+                }
+            }
+
+            if (supabase) {
+                await loadGallery();
+            }
+            document.getElementById('photoCaption').value = '';
+            alert(`${files.length} photo(s) uploaded successfully!`);
+        }
+
+        async function handleAddLeader(event) {
+            event.preventDefault();
+            
+            if (!currentUser) {
+                alert('Please sign in to add leadership members.');
+                return;
+            }
+
+            const name = document.getElementById('leaderName').value;
+            const position = document.getElementById('leaderPosition').value;
+            const bio = document.getElementById('leaderBio').value;
+
+            try {
+                if (supabase) {
+                    const { error } = await supabase
+                        .from('leadership')
+                        .insert({
+                            name,
+                            position,
+                            bio,
+                            added_by: currentUser.user_metadata?.full_name || currentUser.email,
+                            user_id: currentUser.id
+                        });
+
+                    if (error) throw error;
+                } else {
+                    // Fallback mode
+                    const leaders = JSON.parse(localStorage.getItem('leaders')) || [];
+                    leaders.push({
+                        id: Date.now(),
+                        name,
+                        position,
+                        bio,
+                        added_by: currentUser.name,
+                        created_at: new Date().toISOString()
+                    });
+                    localStorage.setItem('leaders', JSON.stringify(leaders));
+                }
+
+                // Clear form
+                document.getElementById('leaderName').value = '';
+                document.getElementById('leaderPosition').value = '';
+                document.getElementById('leaderBio').value = '';
+
+                await loadLeadership();
+                alert('Leadership member added successfully!');
+            } catch (error) {
+                console.error('Error adding leader:', error);
+                alert('Error adding leadership member: ' + error.message);
+            }
+        }
+
+        // UI management functions
+        function showUserInterface() {
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('signupBtn').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'block';
+            
+            const userName = currentUser?.user_metadata?.full_name || 
+                           currentUser?.name || 
+                           currentUser?.email?.split('@')[0] || 
+                           'User';
+            document.getElementById('userProfile').textContent = userName;
+        }
+
+        function hideUserInterface() {
+            document.getElementById('loginBtn').style.display = 'inline-block';
+            document.getElementById('signupBtn').style.display = 'inline-block';
+            document.getElementById('userInfo').style.display = 'none';
+            document.getElementById('userDashboard').style.display = 'none';
+        }
+
+        function showLogin() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function showSignup() {
+            document.getElementById('signupModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            // Clear error messages
+            const errorDivs = document.querySelectorAll('.error, .success');
+            errorDivs.forEach(div => div.textContent = '');
+        }
+
+        function showDashboard() {
+            const dashboard = document.getElementById('userDashboard');
+            if (dashboard.style.display === 'none' || !dashboard.style.display) {
+                dashboard.style.display = 'block';
+                dashboard.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                dashboard.style.display = 'none';
+            }
+        }
+
+        function updateMemberCount() {
+            if (!supabase) {
+                const users = JSON.parse(localStorage.getItem('communityUsers')) || [];
+                document.getElementById('memberCount').textContent = `${users.length} Members`;
+                document.getElementById('memberCount').style.display = 'block';
+            }
+        }
+
+        // Event listeners
+        window.onload = initApp;
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+    </script>
+</body>
+</html>
